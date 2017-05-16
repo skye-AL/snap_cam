@@ -110,7 +110,7 @@
 #include <sys/time.h>
 #include <errno.h>
 
-#include "turbojpeg.h"
+// #include "turbojpeg.h"
 
 #include "camera.h"
 #include <syslog.h>
@@ -238,7 +238,7 @@ private:
 
     int printCapabilities();
     int setParameters();
-    int compressJpegAndSave(ICameraFrame *frame, char *name);
+    // int compressJpegAndSave(ICameraFrame *frame, char *name);
     int takePicture();
     int setFPSindex(int fps, int &pFpsIdx, int &vFpsIdx);
 };
@@ -361,83 +361,83 @@ int CameraTest::takePicture()
     return 0;
 }
 
-int CameraTest::compressJpegAndSave(ICameraFrame *frame, char* name)
-{
-    uint32_t jpegSize = 0;
-    int jpegQuality = 90;
-    uint8_t *dest = NULL;
-    int rc = 0;
+// int CameraTest::compressJpegAndSave(ICameraFrame *frame, char* name)
+// {
+//     uint32_t jpegSize = 0;
+//     int jpegQuality = 90;
+//     uint8_t *dest = NULL;
+//     int rc = 0;
 
-    tjhandle jpegCompressor = tjInitCompress();
-    if (jpegCompressor == NULL) {
-        printf("Could not open TurboJpeg compressor\n");
-        return -1;
-    }
+//     tjhandle jpegCompressor = tjInitCompress();
+//     if (jpegCompressor == NULL) {
+//         printf("Could not open TurboJpeg compressor\n");
+//         return -1;
+//     }
 
-    uint32_t w = picSize_.width;
-    uint32_t h = picSize_.height;
-    uint32_t stride = align_size(w, SNAPSHOT_WIDTH_ALIGN);
-    uint32_t scanlines = align_size(h, SNAPSHOT_HEIGHT_ALIGN);
+//     uint32_t w = picSize_.width;
+//     uint32_t h = picSize_.height;
+//     uint32_t stride = align_size(w, SNAPSHOT_WIDTH_ALIGN);
+//     uint32_t scanlines = align_size(h, SNAPSHOT_HEIGHT_ALIGN);
 
-    uint32_t cbSize =  tjPlaneSizeYUV(1, w, 0, h, TJSAMP_420);
-    uint32_t crSize =  tjPlaneSizeYUV(2, w, 0, h, TJSAMP_420);
-    printf("st=%d, sc=%d\n", stride, scanlines);
+//     uint32_t cbSize =  tjPlaneSizeYUV(1, w, 0, h, TJSAMP_420);
+//     uint32_t crSize =  tjPlaneSizeYUV(2, w, 0, h, TJSAMP_420);
+//     printf("st=%d, sc=%d\n", stride, scanlines);
 
-    uint8_t *yPlane, *cbPlane, *crPlane;
-    uint8_t* planes[3];
-    int strides[3];
+//     uint8_t *yPlane, *cbPlane, *crPlane;
+//     uint8_t* planes[3];
+//     int strides[3];
 
-    yPlane = frame->data;
-    cbPlane = (uint8_t*) malloc(cbSize);
-    crPlane = (uint8_t*) malloc(crSize);
+//     yPlane = frame->data;
+//     cbPlane = (uint8_t*) malloc(cbSize);
+//     crPlane = (uint8_t*) malloc(crSize);
 
-    uint8_t *pCbcrSrc;
-    uint8_t *pCbDest = cbPlane;
-    uint8_t *pCrDest = crPlane;
+//     uint8_t *pCbcrSrc;
+//     uint8_t *pCbDest = cbPlane;
+//     uint8_t *pCrDest = crPlane;
 
-    uint32_t line=0;
+//     uint32_t line=0;
 
-    /* copy interleaved CbCr data to separate Cb and Cr planes */
-    for (line=0; line < h/2; line++) {
-        pCbcrSrc = frame->data + (stride * scanlines) + line*stride;
-        uint32_t count = w/2;
-        while (count != 0) {
-            *pCrDest = *(pCbcrSrc++);
-            *pCbDest = *(pCbcrSrc++);
-            pCrDest++;
-            pCbDest++;
-            count--;
-        }
-    }
-    planes[0] = yPlane;
-    planes[1] = cbPlane;
-    planes[2] = crPlane;
-    strides[0] = stride;
-    strides[1] = 0;
-    strides[2] = 0;
+//     // copy interleaved CbCr data to separate Cb and Cr planes
+//     for (line=0; line < h/2; line++) {
+//         pCbcrSrc = frame->data + (stride * scanlines) + line*stride;
+//         uint32_t count = w/2;
+//         while (count != 0) {
+//             *pCrDest = *(pCbcrSrc++);
+//             *pCbDest = *(pCbcrSrc++);
+//             pCrDest++;
+//             pCbDest++;
+//             count--;
+//         }
+//     }
+//     planes[0] = yPlane;
+//     planes[1] = cbPlane;
+//     planes[2] = crPlane;
+//     strides[0] = stride;
+//     strides[1] = 0;
+//     strides[2] = 0;
 
-    tjCompressFromYUVPlanes(jpegCompressor, planes, w, strides, h, TJSAMP_420,
-                            &dest, (long unsigned int *)&jpegSize, jpegQuality,
-                            TJFLAG_FASTDCT);
+//     tjCompressFromYUVPlanes(jpegCompressor, planes, w, strides, h, TJSAMP_420,
+//                             &dest, (long unsigned int *)&jpegSize, jpegQuality,
+//                             TJFLAG_FASTDCT);
 
-    /* save the file to disk */
-    printf("saving JPEG image: %s\n", name);
-    FILE *fp = fopen(name, "w");
-    if (fp == NULL) {
-        printf("fopen() failed\n");
-        rc = -1;
-        goto exit1;
-    }
-    fwrite(dest, jpegSize, 1, fp);
-    fclose(fp);
+//     // save the file to disk
+//     printf("saving JPEG image: %s\n", name);
+//     FILE *fp = fopen(name, "w");
+//     if (fp == NULL) {
+//         printf("fopen() failed\n");
+//         rc = -1;
+//         goto exit1;
+//     }
+//     fwrite(dest, jpegSize, 1, fp);
+//     fclose(fp);
 
-exit1:
-    tjFree(dest);
-    tjDestroy(jpegCompressor);
-    free(cbPlane);
-    free(crPlane);
-    return 0;
-}
+// exit1:
+//     tjFree(dest);
+//     tjDestroy(jpegCompressor);
+//     free(cbPlane);
+//     free(crPlane);
+//     return 0;
+// }
 
 void CameraTest::onError()
 {
@@ -816,10 +816,10 @@ int CameraTest::setParameters()
 
     /* Find index and set FPS  */
     rc = setFPSindex(config_.fps, pFpsIdx, vFpsIdx);
-    if ( rc == -1)
-    {
-        return rc;
-    }
+    // if ( rc == -1)
+    // {
+    //     return rc;
+    // }
     printf("setting preview fps range: %d, %d ( idx = %d ) \n",
     caps_.previewFpsRanges[pFpsIdx].min,
     caps_.previewFpsRanges[pFpsIdx].max, pFpsIdx);
